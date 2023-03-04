@@ -57,13 +57,11 @@ namespace MicKeywordDetection
                     else if (result.Reason == ResultReason.Canceled)
                     {
                         var cancellation = CancellationDetails.FromResult(result);
-                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+                        throw new Exception($"CANCELED: Reason={cancellation.Reason}");
 
                         if (cancellation.Reason == CancellationReason.Error)
                         {
-                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
-                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         }
                     }
                 }
