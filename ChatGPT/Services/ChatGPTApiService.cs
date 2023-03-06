@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ChatGPT.Services
 {
-    public class ConversationService
+    public class ChatGPTApiService
     {
         private static readonly HttpClient s_client = new();
 
@@ -21,19 +21,19 @@ namespace ChatGPT.Services
                 IgnoreReadOnlyProperties = true
             });
 
-        private static string GetRequestBodyJson()
+        private static string GetRequestBodyJson(ChatMessage[] incomingMessages)
         {
             // Set up the request body
             var requestBody = new ChatRequestBody
             {
                 Model = "gpt-3.5-turbo",
-                Messages = settings.Messages,
-                Max_Tokens = settings.MaxTokens,
-                Temperature = settings.Temperature,
-                TopP = settings.TopP,
+                Messages = incomingMessages,
+                Max_Tokens = 256,
+                Temperature = 0.7m,
+                TopP = 1,
                 N = 1,
                 Stream = false,
-                Stop = settings.Stop,
+                Stop = null,
                 Frequency_Penalty = 0.0m,
                 Presence_Penalty = 0.0m,
                 User = null
@@ -82,7 +82,7 @@ namespace ChatGPT.Services
             return JsonSerializer.Deserialize(responseBody, s_serializerContext.ChatResponseSuccess);
         }
 
-        public async Task<ChatResponse?> GetResponseDataAsync()
+        public async Task<ChatResponse?> GetResponseDataAsync(ChatMessage[] incomingMessages)
         {
             // Set up the API URL and API key
             var apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -93,7 +93,7 @@ namespace ChatGPT.Services
             }
 
             // Get the request body JSON
-            var requestBodyJson = GetRequestBodyJson();
+            var requestBodyJson = GetRequestBodyJson(incomingMessages);
 
             // Send the API request and get the response data
             return await SendApiRequestAsync(apiUrl, apiKey, requestBodyJson);
