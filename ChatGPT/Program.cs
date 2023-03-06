@@ -48,21 +48,24 @@ namespace MicKeywordDetection
                     // Checks result.
                     if (result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        Console.WriteLine($"We recognized: {result.Text}");
+                        Console.WriteLine($"Recognized: {result.Text}");
+
+
                     }
                     else if (result.Reason == ResultReason.NoMatch)
                     {
-                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        Console.Write($"NOMATCH: Speech could not be recognized.");
                     }
                     else if (result.Reason == ResultReason.Canceled)
                     {
                         var cancellation = CancellationDetails.FromResult(result);
-                        throw new Exception($"CANCELED: Reason={cancellation.Reason}");
 
                         if (cancellation.Reason == CancellationReason.Error)
                         {
                             throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         }
+
+                        throw new Exception($"CANCELED: Reason={cancellation.Reason}");
                     }
                 }
             }
