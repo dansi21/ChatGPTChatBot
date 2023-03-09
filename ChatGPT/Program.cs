@@ -47,7 +47,7 @@ namespace MicKeywordDetection
             }
         }
 
-        static async void HoldConversation() 
+        static async Task HoldConversation() 
         {
             Conversation newConversation = new Conversation();
 
