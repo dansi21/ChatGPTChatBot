@@ -43,49 +43,60 @@ namespace MicKeywordDetection
             {
                 Console.WriteLine("Keyword detected: 'Jarvis'");
                 //Start new conversation
-                Conversation newConversation = new Conversation();
-
-                do
-                {
-                    var config = SpeechConfig.FromSubscription(Environment.GetEnvironmentVariable("JarvisLanguageKey", EnvironmentVariableTarget.User), "westus");
-
-                    using (var recognizer = new Microsoft.CognitiveServices.Speech.SpeechRecognizer(config))
-                    {
-                        Console.WriteLine("Say something...");
-
-                        var result = await recognizer.RecognizeOnceAsync();
-
-                        // Checks result.
-                        if (result.Reason == ResultReason.RecognizedSpeech)
-                        {
-                            Console.WriteLine($"Recognized: {result.Text}");
-                            var synthesizer = new System.Speech.Synthesis.SpeechSynthesizer();
-                            synthesizer.SetOutputToDefaultAudioDevice();
-
-                            var x = await newConversation.SendMessage(result.Text);
-
-                            Console.WriteLine(x);
-                            char[] c = { '0', '/' };
-                            synthesizer.Speak(x.TrimEnd(c));
-                        }
-                        else if (result.Reason == ResultReason.NoMatch)
-                        {
-                            Console.Write($"NOMATCH: Speech could not be recognized.");
-                        }
-                        else if (result.Reason == ResultReason.Canceled)
-                        {
-                            var cancellation = CancellationDetails.FromResult(result);
-
-                            if (cancellation.Reason == CancellationReason.Error)
-                            {
-                                throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                            }
-
-                            throw new Exception($"CANCELED: Reason={cancellation.Reason}");
-                        }
-                    }
-                } while (newConversation.messages.Last().Content.EndsWith("/0") == false);
+                HoldConversation();
             }
+        }
+
+        static async void HoldConversation() 
+        {
+            Conversation newConversation = new Conversation();
+
+            do
+            {
+                var config = SpeechConfig.FromSubscription(Environment.GetEnvironmentVariable("JarvisLanguageKey", EnvironmentVariableTarget.User), "westus");
+
+                using (var recognizer = new Microsoft.CognitiveServices.Speech.SpeechRecognizer(config))
+                {
+                    Console.WriteLine("Say something...");
+
+                    var result = await recognizer.RecognizeOnceAsync();
+
+                    // Checks result.
+                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        Console.WriteLine($"Recognized: {result.Text}");
+
+                        SpeakResponseFromGptAsync(result.Text, newConversation);
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.Write($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        }
+
+                        throw new Exception($"CANCELED: Reason={cancellation.Reason}");
+                    }
+                }
+            } while (newConversation.messages.Last().Content.EndsWith("/0") == false);
+        }
+
+        private static async Task SpeakResponseFromGptAsync(string text, Conversation conversation)
+        {
+            string response = await conversation.SendMessage(text);
+
+            Console.WriteLine(response);
+
+            var synthesizer = new System.Speech.Synthesis.SpeechSynthesizer();
+            synthesizer.SetOutputToDefaultAudioDevice();
+            char[] c = { '0', '/' };
+            synthesizer.Speak(response.TrimEnd(c));
         }
     }
 }
