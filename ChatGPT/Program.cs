@@ -65,7 +65,8 @@ namespace MicKeywordDetection
                             var x = await newConversation.SendMessage(result.Text);
 
                             Console.WriteLine(x);
-                            synthesizer.Speak(x);
+                            char[] c = { '0', '/' };
+                            synthesizer.Speak(x.TrimEnd(c));
                         }
                         else if (result.Reason == ResultReason.NoMatch)
                         {

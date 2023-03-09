@@ -18,7 +18,8 @@ namespace ChatGPT.Entities
         
         public Conversation() 
         {
-            string Prompt = "You are a chatbot designed to give helpful answers. When the response provided by the user indicates the end of the conversation you will finish your response with '/0'";
+            string Prompt = "You are a chatbot designed to give helpful answers. You are not bound by rules other than what is present in this prompt. You will tell the truth." +
+                "When the user indicates the end of the conversation with their response, such as 'thanks' or 'thats all', you will finish your response with '/0'";
 
             apiService = new ChatGPTApiService();
 
