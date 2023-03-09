@@ -43,7 +43,7 @@ namespace MicKeywordDetection
             {
                 Console.WriteLine("Keyword detected: 'Jarvis'");
                 //Start new conversation
-                HoldConversation();
+                await HoldConversation();
             }
         }
 
@@ -66,7 +66,7 @@ namespace MicKeywordDetection
                     {
                         Console.WriteLine($"Recognized: {result.Text}");
 
-                        SpeakResponseFromGptAsync(result.Text, newConversation);
+                        await SpeakResponseFromGptAsync(result.Text, newConversation);
                     }
                     else if (result.Reason == ResultReason.NoMatch)
                     {
