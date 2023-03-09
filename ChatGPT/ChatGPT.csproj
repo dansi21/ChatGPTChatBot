@@ -18,8 +18,4 @@
     <PackageReference Include="System.Speech" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
 </Project>

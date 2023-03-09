@@ -82,7 +82,7 @@ namespace ChatGPT.Services
             return JsonSerializer.Deserialize(responseBody, s_serializerContext.ChatResponseSuccess);
         }
 
-        public async Task<ChatResponse?> GetResponseDataAsync(ChatMessage[] incomingMessages)
+        public async Task<ChatResponseSuccess> GetResponseDataAsync(ChatMessage[] incomingMessages)
         {
             // Set up the API URL and API key
             var apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -96,7 +96,7 @@ namespace ChatGPT.Services
             var requestBodyJson = GetRequestBodyJson(incomingMessages);
 
             // Send the API request and get the response data
-            return await SendApiRequestAsync(apiUrl, apiKey, requestBodyJson);
+            return (ChatResponseSuccess)await SendApiRequestAsync(apiUrl, apiKey, requestBodyJson);
         }
     }
 }

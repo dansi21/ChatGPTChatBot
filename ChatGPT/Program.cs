@@ -1,11 +1,19 @@
-﻿using Microsoft.CognitiveServices.Speech;
+﻿using ChatGPT.Entities;
+using Microsoft.CognitiveServices.Speech;
 using System.Speech.Recognition;
+using System.Speech.Synthesis;
 
 namespace MicKeywordDetection
 {
     class Program
     {
         static void Main(string[] args)
+        {
+            ListenForActivation();
+            Console.ReadLine();
+        }
+
+        public static void ListenForActivation() 
         {
             // Create a new SpeechRecognitionEngine instance
             SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine();
@@ -25,49 +33,57 @@ namespace MicKeywordDetection
             recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
             Console.WriteLine("Listening for 'jarvis'...");
-            Console.ReadLine();
         }
 
         static async void SpeechRecognizedHandler(object sender, SpeechRecognizedEventArgs e)
         {
             string recognizedText = e.Result.Text;
 
-            // Check if the recognized text contains the keyword you are listening for
             if (recognizedText.ToLower().Contains("jarvis"))
             {
                 Console.WriteLine("Keyword detected: 'Jarvis'");
+                //Start new conversation
+                Conversation newConversation = new Conversation();
 
-                var config = SpeechConfig.FromSubscription(Environment.GetEnvironmentVariable("JarvisLanguageKey", EnvironmentVariableTarget.User), "westus");
-
-                using (var recognizer = new Microsoft.CognitiveServices.Speech.SpeechRecognizer(config))
+                do
                 {
-                    Console.WriteLine("Say something...");
+                    var config = SpeechConfig.FromSubscription(Environment.GetEnvironmentVariable("JarvisLanguageKey", EnvironmentVariableTarget.User), "westus");
 
-                    var result = await recognizer.RecognizeOnceAsync();
-
-                    // Checks result.
-                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    using (var recognizer = new Microsoft.CognitiveServices.Speech.SpeechRecognizer(config))
                     {
-                        Console.WriteLine($"Recognized: {result.Text}");
+                        Console.WriteLine("Say something...");
 
+                        var result = await recognizer.RecognizeOnceAsync();
 
-                    }
-                    else if (result.Reason == ResultReason.NoMatch)
-                    {
-                        Console.Write($"NOMATCH: Speech could not be recognized.");
-                    }
-                    else if (result.Reason == ResultReason.Canceled)
-                    {
-                        var cancellation = CancellationDetails.FromResult(result);
-
-                        if (cancellation.Reason == CancellationReason.Error)
+                        // Checks result.
+                        if (result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                        }
+                            Console.WriteLine($"Recognized: {result.Text}");
+                            var synthesizer = new System.Speech.Synthesis.SpeechSynthesizer();
+                            synthesizer.SetOutputToDefaultAudioDevice();
 
-                        throw new Exception($"CANCELED: Reason={cancellation.Reason}");
+                            var x = await newConversation.SendMessage(result.Text);
+
+                            Console.WriteLine(x);
+                            synthesizer.Speak(x);
+                        }
+                        else if (result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.Write($"NOMATCH: Speech could not be recognized.");
+                        }
+                        else if (result.Reason == ResultReason.Canceled)
+                        {
+                            var cancellation = CancellationDetails.FromResult(result);
+
+                            if (cancellation.Reason == CancellationReason.Error)
+                            {
+                                throw new Exception($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            }
+
+                            throw new Exception($"CANCELED: Reason={cancellation.Reason}");
+                        }
                     }
-                }
+                } while (newConversation.messages.Last().Content.EndsWith("/0") == false);
             }
         }
     }
